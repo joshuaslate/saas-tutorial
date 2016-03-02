@@ -6,11 +6,13 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var passport = require('passport');
 var config = require('./config/main');
+var cors = require('cors');
 var port = 3000;
 
 // Use body-parser to get POST requests for API use
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
 // Log requests to console
 app.use(morgan('dev'));

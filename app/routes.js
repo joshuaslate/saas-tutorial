@@ -23,8 +23,9 @@ module.exports = function(app) {
 
   // Register new users
   apiRoutes.post('/register', function(req, res) {
+    console.log(req.body);
     if(!req.body.email || !req.body.password) {
-      res.json({ success: false, message: 'Please enter email and password.' });
+      res.status(400).json({ success: false, message: 'Please enter email and password.' });
     } else {
       var newUser = new User({
         email: req.body.email,
@@ -34,9 +35,9 @@ module.exports = function(app) {
       // Attempt to save the user
       newUser.save(function(err) {
         if (err) {
-          return res.json({ success: false, message: 'That email address already exists.'});
+          return res.status(400).json({ success: false, message: 'That email address already exists.'});
         }
-        res.json({ success: true, message: 'Successfully created new user.' });
+        res.status(201).json({ success: true, message: 'Successfully created new user.' });
       });
     }
   });
@@ -49,7 +50,7 @@ module.exports = function(app) {
       if (err) throw err;
 
       if (!user) {
-        res.send({ success: false, message: 'Authentication failed. User not found.' });
+        res.status(401).json({ success: false, message: 'Authentication failed. User not found.' });
       } else {
         // Check if password matches
         user.comparePassword(req.body.password, function(err, isMatch) {
@@ -58,9 +59,9 @@ module.exports = function(app) {
             var token = jwt.sign(user, config.secret, {
               expiresIn: 10080 // in seconds
             });
-            res.json({ success: true, token: 'JWT ' + token });
+            res.status(200).json({ success: true, token: 'JWT ' + token });
           } else {
-            res.send({ success: false, message: 'Authentication failed. Passwords did not match.' });
+            res.status(401).json({ success: false, message: 'Authentication failed. Passwords did not match.' });
           }
         });
       }
@@ -72,9 +73,9 @@ module.exports = function(app) {
   apiRoutes.get('/chat', passport.authenticate('jwt', { session: false }), function(req, res) {
     Chat.find({$or : [{'to': req.user._id}, {'from': req.user._id}]}, function(err, messages) {
       if (err)
-        res.send(err);
+        res.status(400).send(err);
 
-      res.json(messages);
+      res.status(400).json(messages);
     });
   });
 
@@ -88,9 +89,9 @@ module.exports = function(app) {
         // Save the chat message if there are no errors
         chat.save(function(err) {
             if (err)
-                res.send(err);
+                res.status(400).send(err);
 
-            res.json({ message: 'Message sent!' });
+            res.status(201).json({ message: 'Message sent!' });
         });
   });
 
