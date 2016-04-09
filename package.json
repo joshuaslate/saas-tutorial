@@ -1,6 +1,9 @@
 {
   "name": "saas",
   "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
   "dependencies": {
     "babel-preset-react": "^6.3.13",
     "babelify": "^7.2.0",
