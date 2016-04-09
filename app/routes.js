@@ -1,12 +1,15 @@
 // Import dependencies
-var passport = require('passport');
-var express = require('express');
-var config = require('../config/main');
-var jwt = require('jsonwebtoken');
+const passport = require('passport');
+const express = require('express');
+const config = require('../config/main');
+const jwt = require('jsonwebtoken');
+
+// Set up middleware
+const requireAuth = passport.authenticate('jwt', { session: false });
 
 // Load models
-var User = require('./models/user');
-var Chat = require('./models/chat');
+const User = require('./models/user');
+const Chat = require('./models/chat');
 
 // Export the routes for our app to use
 module.exports = function(app) {
@@ -19,7 +22,7 @@ module.exports = function(app) {
   require('../config/passport')(passport);
 
   // Create API group routes
-  var apiRoutes = express.Router();
+  const apiRoutes = express.Router();
 
   // Register new users
   apiRoutes.post('/register', function(req, res) {
@@ -27,7 +30,7 @@ module.exports = function(app) {
     if(!req.body.email || !req.body.password) {
       res.status(400).json({ success: false, message: 'Please enter email and password.' });
     } else {
-      var newUser = new User({
+      const newUser = new User({
         email: req.body.email,
         password: req.body.password
       });
@@ -56,7 +59,7 @@ module.exports = function(app) {
         user.comparePassword(req.body.password, function(err, isMatch) {
           if (isMatch && !err) {
             // Create token if the password matched and no error was thrown
-            var token = jwt.sign(user, config.secret, {
+            const token = jwt.sign(user, config.secret, {
               expiresIn: 10080 // in seconds
             });
             res.status(200).json({ success: true, token: 'JWT ' + token });
@@ -70,7 +73,7 @@ module.exports = function(app) {
 
   // Protect chat routes with JWT
   // GET messages for authenticated user
-  apiRoutes.get('/chat', passport.authenticate('jwt', { session: false }), function(req, res) {
+  apiRoutes.get('/chat', requireAuth, function(req, res) {
     Chat.find({$or : [{'to': req.user._id}, {'from': req.user._id}]}, function(err, messages) {
       if (err)
         res.status(400).send(err);
@@ -80,8 +83,8 @@ module.exports = function(app) {
   });
 
   // POST to create a new message from the authenticated user
-  apiRoutes.post('/chat', passport.authenticate('jwt', { session: false }), function(req, res) {
-    var chat = new Chat();
+  apiRoutes.post('/chat', requireAuth, function(req, res) {
+    const chat = new Chat();
         chat.from = req.user._id;
         chat.to = req.body.to;
         chat.message_body = req.body.message_body;
@@ -96,7 +99,7 @@ module.exports = function(app) {
   });
 
   // PUT to update a message the authenticated user sent
-  apiRoutes.put('/chat/:message_id', passport.authenticate('jwt', { session: false }), function(req, res) {
+  apiRoutes.put('/chat/:message_id', requireAuth, function(req, res) {
     Chat.findOne({$and : [{'_id': req.params.message_id}, {'from': req.user._id}]}, function(err, message) {
       if (err)
         res.send(err);
@@ -114,7 +117,7 @@ module.exports = function(app) {
   });
 
   // DELETE a message
-  apiRoutes.delete('/chat/:message_id', passport.authenticate('jwt', { session: false }), function(req, res) {
+  apiRoutes.delete('/chat/:message_id', requireAuth, function(req, res) {
     Chat.findOneAndRemove({$and : [{'_id': req.params.message_id}, {'from': req.user._id}]}, function(err) {
       if (err)
         res.send(err);
