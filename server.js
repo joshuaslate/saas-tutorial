@@ -1,13 +1,13 @@
 // Include our packages in our main server file
-var express = require('express');
+const express = require('express');
 app = express();
-var mongoose = require('mongoose');
-var bodyParser = require('body-parser');
-var morgan = require('morgan');
-var passport = require('passport');
-var config = require('./config/main');
-var cors = require('cors');
-var port = 3000;
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const passport = require('passport');
+const config = require('./config/main');
+const cors = require('cors');
+const port = 3000;
 
 // Use body-parser to get POST requests for API use
 app.use(bodyParser.urlencoded({ extended: true }));

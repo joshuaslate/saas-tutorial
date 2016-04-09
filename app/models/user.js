@@ -1,8 +1,8 @@
-var mongoose = require('mongoose');
-var bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 // Schema defines how the user's data will be stored in MongoDB
-var UserSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     lowercase: true,
@@ -22,7 +22,7 @@ var UserSchema = new mongoose.Schema({
 
 // Saves the user's password hashed (plain text password storage is not good)
 UserSchema.pre('save', function (next) {
-  var user = this;
+  const user = this;
   if (this.isModified('password') || this.isNew) {
     bcrypt.genSalt(10, function (err, salt) {
       if (err) {
