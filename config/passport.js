@@ -10,7 +10,8 @@ module.exports = function(passport) {
     secretOrKey: config.secret
   };
   passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    User.findOne({id: jwt_payload.id}, function(err, user) {
+    const jwt_user_id = jwt_payload._doc._id
+    User.findById(jwt_user_id, function(err, user) {
       if (err) {
         return done(err, false);
       }
